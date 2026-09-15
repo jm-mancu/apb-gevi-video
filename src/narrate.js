@@ -26,6 +26,32 @@ const PRIMARY_VOICE = process.env.VOICE || "es-AR-ElenaNeural";
 const FALLBACK_VOICE = "es-419-PalomaNeural"; // español latino neutro, por si la voz AR no está disponible
 const RATE = process.env.TTS_RATE || "+0%";
 
+// Algunas palabras se pronuncian mal con la voz por defecto (suena a inglés:
+// "pórtal" en vez de "portál", "vídeo" en vez de "vidéo", "yutub" en vez de "iutub").
+// Esta lista fuerza la pronunciación correcta SOLO en el audio generado —
+// el texto de los subtítulos (subtitles.js) usa scene.narration sin tocar,
+// así que en pantalla se sigue viendo la ortografía normal.
+const PRONUNCIATION_FIXES = [
+  { pattern: /\bportal(es)?\b/gi, replacement: "portál$1" },
+  { pattern: /\bv[ií]deo(s)?\b/gi, replacement: "vidéo$1" },
+  { pattern: /\byoutube\b/gi, replacement: "Iutub" },
+];
+
+function applyPronunciationFixes(text) {
+  let out = text;
+  for (const { pattern, replacement } of PRONUNCIATION_FIXES) {
+    out = out.replace(pattern, (match, ...groups) => {
+      // reemplaza los grupos capturados (ej. la "s" del plural) y respeta mayúscula inicial
+      let result = replacement.replace(/\$(\d)/g, (_, i) => groups[Number(i) - 1] || "");
+      if (match[0] === match[0].toUpperCase()) {
+        result = result[0].toUpperCase() + result.slice(1);
+      }
+      return result;
+    });
+  }
+  return out;
+}
+
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
     const proc = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] });
@@ -51,12 +77,13 @@ async function narrateScene(scene) {
     return;
   }
   const outPath = path.join(AUDIO_DIR, `${scene.id}.mp3`);
+  const speechText = applyPronunciationFixes(scene.narration);
   console.log(`[narrate] Generando audio para "${scene.id}" con voz ${PRIMARY_VOICE} ...`);
   try {
-    await synthesize(scene.narration, outPath, PRIMARY_VOICE);
+    await synthesize(speechText, outPath, PRIMARY_VOICE);
   } catch (err) {
     console.warn(`[narrate] Falló la voz "${PRIMARY_VOICE}" (${err.message}). Reintentando con "${FALLBACK_VOICE}"...`);
-    await synthesize(scene.narration, outPath, FALLBACK_VOICE);
+    await synthesize(speechText, outPath, FALLBACK_VOICE);
   }
   console.log(`[narrate] OK -> audio/${scene.id}.mp3`);
 }

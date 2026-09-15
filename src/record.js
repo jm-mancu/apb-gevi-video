@@ -24,6 +24,36 @@ const { fillAllFields } = require("./lib/formFill");
 const CLIPS_DIR = path.join(__dirname, "..", "clips");
 const VIEWPORT = { width: 1600, height: 900 };
 
+// Google muestra, la primera vez que se abre un formulario en un navegador/perfil
+// "nuevo", un cartel de cookies ("Antes de continuar a Google Forms...") que tapa
+// toda la página y bloquea (disabled) los campos hasta que se cierra. Como Playwright
+// arranca un contexto limpio en cada escena, este cartel puede aparecer siempre.
+// Esta función lo detecta y lo cierra si está presente; si no aparece, no hace nada.
+async function dismissConsentIfPresent(page) {
+  const consentButtonTexts = [
+    "Aceptar todo",
+    "Acepto",
+    "Aceptar",
+    "I agree",
+    "Accept all",
+    "Reject all",
+    "Rechazar todo",
+  ];
+  for (const text of consentButtonTexts) {
+    try {
+      const btn = page.getByRole("button", { name: text, exact: false }).first();
+      if (await btn.isVisible({ timeout: 1500 })) {
+        await btn.click({ timeout: 3000 });
+        await page.waitForTimeout(500);
+        return true;
+      }
+    } catch (_) {
+      // ese texto de botón no está presente, se prueba el siguiente
+    }
+  }
+  return false;
+}
+
 async function recordScene(browser, scene) {
   if (scene.type === "manual") {
     console.log(`[record] "${scene.id}" es manual, se omite (grabar a mano en clips/${scene.id}.webm).`);
@@ -48,6 +78,7 @@ async function recordScene(browser, scene) {
   try {
     await page.goto(scene.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(1200);
+    await dismissConsentIfPresent(page);
 
     if (scene.type === "form") {
       await fillAllFields(page, scene.fields || []);

@@ -20,6 +20,16 @@
 
 const PORTAL_URL = "https://script.google.com/macros/s/AKfycbzXJBhrpalbk4ZYlISoA96Kbduyof8GwNuJqzIYReBol8rxQ1XTG8hpPp3J2_5Y1yFRsQ/exec";
 
+// Links personales (ya logueados) a la página principal del portal, uno por rol.
+// Se usan en las escenas que muestran "así se ve tu home" para cada rol —
+// a diferencia de PORTAL_URL (que muestra la pantalla de registro/login sin sesión).
+const ROLE_HOME_URLS = {
+  tribunal: "https://apb-historial-fallos.netlify.app/?u=e5e498aa76804362b6c5cd3f22a40187",
+  comiteEjecutivo: "https://apb-historial-fallos.netlify.app/?u=78cd8fda1566430e9026635778a66b17",
+  arbitro: "https://apb-historial-fallos.netlify.app/?u=707a73ae7b964e2d9b59015e7909f975",
+  representanteClub: "https://apb-historial-fallos.netlify.app/?u=4e8c43531a924329900f2c42764c34da",
+};
+
 const CLUBES = [
   "Argentino",
   "Gimnasia y Esgrima",
@@ -55,7 +65,7 @@ const FORM_URLS = {
   reconsideracionApelacionSubsidio: "https://docs.google.com/forms/d/e/1FAIpQLSfhriAxVRSlUUFjak6uKq_40m35xYhyHDxvhA2Uw4vLq8ExLQ/viewform",
   apelacion: "https://docs.google.com/forms/d/e/1FAIpQLSfOC0dIRktIIOqHWnW2u3WpkE_k73QMQj1751JpyMqhQoH7hQ/viewform",
   respondeAclaraClub: "https://docs.google.com/forms/d/e/1FAIpQLSeBmk-pPd0mzp_zL-ImHgWdLEoH6vMLcRoktYbfUQIilT02_g/viewform",
-  expedienteDeOficio: "https://docs.google.com/forms/d/e/1FAIpQLSexjP7DWd4W3mGdkHTjMV20ojK059ruYCPd_DlVPvpaVfF_gw/viewform",
+  expedienteDeOficio: "https://docs.google.com/forms/d/e/1FAIpQLSe0Q-aorQnswuziOvp9iUcFExPZjsSJhUjytTYJpAccwdhDCw/viewform",
   solicitarAmpliacionInforme: "https://docs.google.com/forms/d/e/1FAIpQLSd4UayrDZ95K23OzHrQ8vl9R5T8h6gc2KQRwHXPAx-f2ceQRg/viewform",
   requerirAclaracionClubes: "https://docs.google.com/forms/d/e/1FAIpQLSdSu0zsY_ymxR0FNozO6-bFXjKphyOCYO3ZR3QwX2grnsVatA/viewform",
   cargarFallo: "https://docs.google.com/forms/d/e/1FAIpQLSdfI5YfCmZWxKq6RJ-OshMpYxlXW_4ae6q_ACi-8m7cf-OgLg/viewform",
@@ -124,11 +134,12 @@ const scenes = [
   {
     id: "03-recorrido-portal",
     type: "navigate",
-    url: PORTAL_URL, // idealmente reemplazar por el link personal ya logueado de una cuenta de prueba
+    url: ROLE_HOME_URLS.arbitro, // vista logueada; a continuación el guion entra al rol Árbitro
     actions: { waitMs: 3000, scroll: true },
     narration:
-      "Una vez adentro, arriba a la izquierda ves tu nombre y tu rol. Al lado, un menú con 'Descargas', 'Tutoriales', y 'Expedientes en Drive'. " +
-      "Más abajo, según tu rol, vas a ver un cuadro oscuro con los botones de 'Presentaciones' — son los formularios que te corresponden a vos. Y debajo de todo, el buscador y el historial completo de fallos, con filtros por categoría, año, y tipo de sanción.",
+      "Una vez adentro, arriba a la izquierda ves tu nombre y tu rol. Al lado, un menú con tres apartados: 'Descargas', donde vas a encontrar los modelos y plantillas para tus escritos; 'Tutoriales', con esta misma guía; y 'Expedientes en Drive', con el archivo completo de todos los expedientes. " +
+      "Más abajo, según tu rol, vas a ver un cuadro oscuro con los botones de 'Presentaciones' — son los formularios que te corresponden a vos. Y debajo de todo, el buscador y el historial completo de fallos, con filtros por categoría, año, y tipo de sanción. " +
+      "Un dato general antes de arrancar: en todos los formularios, los campos que no dicen 'opcional' son obligatorios. Si no los completás, el formulario no te va a dejar enviarlo.",
   },
 
   // ---------------------------------------------------------------------
@@ -157,13 +168,14 @@ const scenes = [
         value: "Sin observaciones adicionales (dato de ejemplo).",
         optional: true,
       },
-      { kind: "text", label: "Informe arbitral (Word o PDF)", value: DRIVE_LINK_EJEMPLO },
+      { kind: "text", label: "Informe arbitral (Word o PDF)", value: DRIVE_LINK_EJEMPLO, optional: true },
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Informe Arbitral'. " +
       "Si sos árbitro, tu botón principal es 'Informe Arbitral' — es el que usás para dar inicio a un expediente disciplinario nuevo. " +
       "Te va a pedir: tu nombre y apellido, el Club Local y el Club Visitante, la Categoría, la fecha del partido, la descripción de los hechos, y si el acusado es capitán de su equipo — esto último solo si corresponde, si no, marcá 'No aplica'. " +
-      "Al final, un campo de Observaciones que es opcional, para links de YouTube, fotos, o cualquier aclaración extra. Y por último, el link al informe arbitral en Word o PDF, que tenés que compartir antes desde tu Drive con 'cualquier persona con el enlace' y pegar acá el link. " +
+      "Al final, un campo de Observaciones que es opcional, para links de YouTube, fotos, o cualquier aclaración extra. Y hay un campo para adjuntar el informe arbitral en Word o PDF, que también es opcional. " +
       "Enviás el formulario, y automáticamente el sistema abre el expediente: le asigna un número interno, crea la carpeta en Drive, guarda un PDF con todo lo que cargaste, y te manda una constancia por mail — además de avisarle a todo el Tribunal y a los representantes de ambos clubes que se abrió un expediente nuevo.",
   },
   {
@@ -189,6 +201,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Responde y Aclara'. " +
       "Completás tu respuesta, y si hace falta, adjuntás un archivo. Al enviarlo, tu respuesta se guarda directo en la carpeta del expediente, y se avisa al Tribunal y a ambos clubes.",
   },
 
@@ -198,7 +211,7 @@ const scenes = [
   {
     id: "06-intro-club",
     type: "navigate",
-    url: PORTAL_URL,
+    url: ROLE_HOME_URLS.representanteClub,
     actions: { waitMs: 3000 },
     narration:
       "Si sos representante de un club, vas a ver hasta cinco botones: Descargo, Recurso de Reconsideración, Reconsideración con Apelación en subsidio, Apelación, y Responde y Aclara.",
@@ -216,6 +229,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Descargo'. " +
       "El Descargo se usa para responder a un expediente que ya está abierto. Te pide tu nombre, tu club — que ya viene completado automáticamente si entraste desde tu botón personal del portal —, el número de expediente al que corresponde, tus observaciones, y el archivo del descargo en Word o PDF. " +
       "Si hay más de una persona acusada en el mismo expediente, se puede presentar un descargo por cada una.",
   },
@@ -232,6 +246,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Recurso de Reconsideración'. " +
       "Este es para cuando ya hay un Fallo, y el club quiere pedir que el Tribunal lo reconsidere. Mismos campos que el Descargo: nombre, club, número de expediente, observaciones, y el escrito adjunto.",
   },
   {
@@ -247,6 +262,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Reconsideración con Apelación en subsidio'. " +
       "Esta opción combina las dos cosas en un solo escrito: pedís la reconsideración, y en subsidio — es decir, por si no prospera — también la apelación. Se completa igual que los anteriores.",
   },
   {
@@ -262,6 +278,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Apelación'. " +
       "Y esta es para apelar directamente un fallo ya emitido, sin pasar por la reconsideración. Mismos campos de siempre.",
   },
   {
@@ -288,6 +305,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario también se llama 'Responde y Aclara'. " +
       "Se completa igual que el del árbitro: respuesta, y archivo si hace falta. Se guarda en la carpeta del expediente y se avisa a todos. " +
       "Un detalle importante: cada vez que se presenta algo sobre un expediente — de cualquiera de los dos lados — se les avisa por mail a los representantes de AMBOS clubes, no solo al que presentó. Así los dos quedan siempre al tanto de la actividad del caso.",
   },
@@ -298,7 +316,7 @@ const scenes = [
   {
     id: "12-intro-tribunal",
     type: "navigate",
-    url: PORTAL_URL,
+    url: ROLE_HOME_URLS.tribunal,
     actions: { waitMs: 3000 },
     narration:
       "El Tribunal tiene, además de todo lo que ya vimos, cuatro formularios propios: Expediente de Oficio, Solicitar Ampliación de Informe Arbitral, Requerir Aclaración a Clubes, y Cargar Fallo. Estos cuatro son de uso exclusivo del Tribunal — si alguien que no está aprobado como Tribunal intenta completarlos, el sistema no procesa nada y avisa por mail.",
@@ -312,7 +330,7 @@ const scenes = [
   {
     id: "14-buscar-expedientes",
     type: "search",
-    url: PORTAL_URL,
+    url: ROLE_HOME_URLS.tribunal,
     fields: [
       { kind: "text", label: "Buscar", value: "Argentino" },
       { kind: "dropdown", label: "Categoría", value: CATEGORIAS[0], optional: true },
@@ -339,6 +357,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Expediente de Oficio'. " +
       "Cuando el Tribunal necesita abrir un expediente sin que haya un informe arbitral o una denuncia previa, usa este formulario: Club Local, Club Visitante, Categoría, fecha del hecho, y el motivo o descripción de los hechos. El archivo es opcional acá, por si hay algo para adjuntar. " +
       "Al enviarlo, se crea el expediente exactamente igual que con un Informe Arbitral: número interno, carpeta en Drive, PDF con los datos, y aviso a ambos clubes y a todo el Tribunal.",
   },
@@ -357,6 +376,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Solicitar Ampliación de Informe Arbitral'. " +
       "Para pedirle al árbitro que amplíe o aclare su informe sobre un expediente ya abierto: ponés el número de expediente, y el motivo o la pregunta. El sistema busca solo al árbitro que cargó el informe original de ese expediente, y le manda el pedido con un link ya precompletado.",
   },
   {
@@ -374,6 +394,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Requerir Aclaración a Clubes'. " +
       "Igual que el anterior, pero para pedirle aclaración a los clubes: número de expediente y motivo. Le llega a los representantes aprobados de ambos clubes del caso.",
   },
   {
@@ -388,6 +409,7 @@ const scenes = [
     ],
     submit: false,
     narration:
+      "Este formulario se llama 'Cargar Fallo'. " +
       "Y por último, el paso que cierra un expediente: cargar el Fallo. Acá pedimos Club Local, Club Visitante, el número de expediente — para evitar confundir casos si hay más de uno entre los mismos clubes al mismo tiempo —, y el archivo del Fallo en PDF. " +
       "Al enviarlo, el sistema guarda el Fallo en la carpeta del expediente, lee automáticamente el contenido para completar la sanción, el tipo de sanción, y los artículos aplicados, y le manda el Fallo por mail a los representantes de ambos clubes y a todo el Tribunal. " +
       "Si el Fallo sanciona a más de una persona, el sistema crea una fila por cada una, todas dentro del mismo expediente.",
@@ -399,11 +421,11 @@ const scenes = [
   {
     id: "19-cierre",
     type: "navigate",
-    url: PORTAL_URL,
+    url: ROLE_HOME_URLS.tribunal,
     actions: { waitMs: 3000 },
     narration:
       "Y con esto ya vimos el circuito completo: desde el registro, pasando por cada tipo de presentación, hasta la carga del Fallo. Cualquier duda que les quede, la sección 'Tutoriales' del portal tiene esta misma guía por escrito. Gracias por ver el video.",
   },
 ];
 
-module.exports = { scenes, PORTAL_URL, FORM_URLS, CLUBES, CATEGORIAS, DRIVE_LINK_EJEMPLO };
+module.exports = { scenes, PORTAL_URL, ROLE_HOME_URLS, FORM_URLS, CLUBES, CATEGORIAS, DRIVE_LINK_EJEMPLO };
