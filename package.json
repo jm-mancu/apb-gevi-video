@@ -1,0 +1,26 @@
+{
+  "name": "apb-gevi-video-tutorial",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generación automática del video tutorial de APB - GeVi: grabación de pantalla (Playwright), narración TTS gratuita (edge-tts) y armado final (ffmpeg).",
+  "type": "commonjs",
+  "scripts": {
+    "record": "node src/record.js",
+    "record:one": "node src/record.js --scene",
+    "narrate": "node src/narrate.js",
+    "subtitles": "node src/subtitles.js",
+    "build": "node src/build.js",
+    "all": "npm run record && npm run narrate && npm run subtitles && npm run build",
+    "check:tools": "node src/checkTools.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "notes": {
+    "tts": "La narración usa el binario/CLI de Python 'edge-tts' (gratis, sin API key), invocado por src/narrate.js vía child_process. Instalar con: pip install edge-tts",
+    "ffmpeg": "Requiere tener 'ffmpeg' y 'ffprobe' instalados y en el PATH del sistema (gratis, open source). src/build.js los invoca directamente por línea de comandos (child_process), sin dependencias npm extra."
+  }
+}
