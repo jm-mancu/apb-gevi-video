@@ -135,7 +135,8 @@ const scenes = [
     id: "03-recorrido-portal",
     type: "navigate",
     url: ROLE_HOME_URLS.arbitro, // vista logueada; a continuación el guion entra al rol Árbitro
-    actions: { waitMs: 3000, scroll: true },
+    redactSelectors: [], // TODO: clase CSS de la tabla de expedientes reales, para taparla automáticamente
+    actions: { waitMs: 15000, scroll: true },
     narration:
       "Una vez adentro, arriba a la izquierda ves tu nombre y tu rol. Al lado, un menú con tres apartados: 'Descargas', donde vas a encontrar los modelos y plantillas para tus escritos; 'Tutoriales', con esta misma guía; y 'Expedientes en Drive', con el archivo completo de todos los expedientes. " +
       "Más abajo, según tu rol, vas a ver un cuadro oscuro con los botones de 'Presentaciones' — son los formularios que te corresponden a vos. Y debajo de todo, el buscador y el historial completo de fallos, con filtros por categoría, año, y tipo de sanción. " +
@@ -212,7 +213,8 @@ const scenes = [
     id: "06-intro-club",
     type: "navigate",
     url: ROLE_HOME_URLS.representanteClub,
-    actions: { waitMs: 3000 },
+    redactSelectors: [],
+    actions: { waitMs: 15000 },
     narration:
       "Si sos representante de un club, vas a ver hasta cinco botones: Descargo, Recurso de Reconsideración, Reconsideración con Apelación en subsidio, Apelación, y Responde y Aclara.",
   },
@@ -263,7 +265,8 @@ const scenes = [
     submit: false,
     narration:
       "Este formulario se llama 'Reconsideración con Apelación en subsidio'. " +
-      "Esta opción combina las dos cosas en un solo escrito: pedís la reconsideración, y en subsidio — es decir, por si no prospera — también la apelación. Se completa igual que los anteriores.",
+      "Esta opción combina las dos cosas en un solo escrito: pedís la reconsideración, y en subsidio — es decir, por si no prospera — también la apelación. Se completa igual que los anteriores. " +
+      "Recordá que toda apelación, sea directa o en subsidio, se presenta ante el Tribunal de la Federación Bonaerense de Básquetbol.",
   },
   {
     id: "10-apelacion",
@@ -279,7 +282,8 @@ const scenes = [
     submit: false,
     narration:
       "Este formulario se llama 'Apelación'. " +
-      "Y esta es para apelar directamente un fallo ya emitido, sin pasar por la reconsideración. Mismos campos de siempre.",
+      "Y esta es para apelar directamente un fallo ya emitido, sin pasar por la reconsideración. Mismos campos de siempre. " +
+      "Recordá que toda apelación, sea directa o en subsidio, se presenta ante el Tribunal de la Federación Bonaerense de Básquetbol.",
   },
   {
     id: "11a-mail-aclaracion-club",
@@ -310,6 +314,19 @@ const scenes = [
       "Un detalle importante: cada vez que se presenta algo sobre un expediente — de cualquiera de los dos lados — se les avisa por mail a los representantes de AMBOS clubes, no solo al que presentó. Así los dos quedan siempre al tanto de la actividad del caso.",
   },
 
+  {
+    id: "11c-denuncia",
+    type: "form",
+    url: "https://docs.google.com/forms/d/e/1FAIpQLSfNc5XwhXd0cGwc6Tc4NOFz2CHyiXSNnkYP1zXuJOXxQkBt8Q/viewform",
+    // Campos pendientes de confirmar (ver README / conversación) — por ahora la
+    // escena abre el formulario y espera, pero no completa nada todavía.
+    fields: [],
+    submit: false,
+    narration:
+      "Este formulario se llama 'Denuncia'. " +
+      "Tanto los representantes de club como los integrantes del Comité Ejecutivo tienen disponible este formulario para denunciar cualquier hecho que consideren contrario a la normativa vigente.",
+  },
+
   // ---------------------------------------------------------------------
   // 6. Rol Tribunal
   // ---------------------------------------------------------------------
@@ -317,7 +334,8 @@ const scenes = [
     id: "12-intro-tribunal",
     type: "navigate",
     url: ROLE_HOME_URLS.tribunal,
-    actions: { waitMs: 3000 },
+    redactSelectors: [],
+    actions: { waitMs: 15000 },
     narration:
       "El Tribunal tiene, además de todo lo que ya vimos, cuatro formularios propios: Expediente de Oficio, Solicitar Ampliación de Informe Arbitral, Requerir Aclaración a Clubes, y Cargar Fallo. Estos cuatro son de uso exclusivo del Tribunal — si alguien que no está aprobado como Tribunal intenta completarlos, el sistema no procesa nada y avisa por mail.",
   },
@@ -331,8 +349,13 @@ const scenes = [
     id: "14-buscar-expedientes",
     type: "search",
     url: ROLE_HOME_URLS.tribunal,
+    // Búsqueda con un término inventado a propósito: como grabamos contra el
+    // sistema real (no hay base de datos de prueba separada), buscar un club
+    // real traería resultados reales (nombres, expedientes). Este término no
+    // le pega a nada, así la búsqueda se ve funcionando sin exponer datos reales.
+    redactSelectors: [], // TODO: agregar acá la clase CSS de la tabla de resultados/expedientes cuando la tengamos, para taparla igual por las dudas
     fields: [
-      { kind: "text", label: "Buscar", value: "Argentino" },
+      { kind: "text", label: "Buscar", value: "Club de Ejemplo Ficticio ZZZ" },
       { kind: "dropdown", label: "Categoría", value: CATEGORIAS[0], optional: true },
     ],
     narration:
@@ -422,7 +445,8 @@ const scenes = [
     id: "19-cierre",
     type: "navigate",
     url: ROLE_HOME_URLS.tribunal,
-    actions: { waitMs: 3000 },
+    redactSelectors: [],
+    actions: { waitMs: 15000 },
     narration:
       "Y con esto ya vimos el circuito completo: desde el registro, pasando por cada tipo de presentación, hasta la carga del Fallo. Cualquier duda que les quede, la sección 'Tutoriales' del portal tiene esta misma guía por escrito. Gracias por ver el video.",
   },

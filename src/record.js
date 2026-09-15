@@ -54,6 +54,36 @@ async function dismissConsentIfPresent(page) {
   return false;
 }
 
+// Espera a que desaparezca el cartel de carga ("Acceso reconocido. Cargando la
+// plataforma...") en vez de confiar solo en un tiempo fijo — el sitio puede tardar
+// bastante más que unos segundos en traer los datos reales.
+async function waitForAppLoaded(page) {
+  try {
+    const loadingIndicator = page.getByText(/cargando/i).first();
+    if (await loadingIndicator.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await loadingIndicator.waitFor({ state: "hidden", timeout: 30000 });
+    }
+  } catch (_) {
+    // no había cartel de carga visible, o ya desapareció -> seguimos sin problema
+  }
+}
+// Difumina (blur) elementos de la pantalla antes de que termine la grabación —
+// pensado para tapar tablas con datos reales (expedientes, nombres) que puedan
+// aparecer en pantallas que se graban contra el sistema en producción.
+// scene.redactSelectors es un array de selectores CSS; por defecto vacío (no tapa nada).
+async function applyRedactions(page, selectors = []) {
+  for (const selector of selectors) {
+    try {
+      await page.evaluate((sel) => {
+        document.querySelectorAll(sel).forEach((el) => {
+          el.style.filter = "blur(10px)";
+        });
+      }, selector);
+    } catch (_) {
+      // selector no encontrado en esta página, se ignora
+    }
+  }
+}
 async function recordScene(browser, scene) {
   if (scene.type === "manual") {
     console.log(`[record] "${scene.id}" es manual, se omite (grabar a mano en clips/${scene.id}.webm).`);
@@ -79,6 +109,12 @@ async function recordScene(browser, scene) {
     await page.goto(scene.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(1200);
     await dismissConsentIfPresent(page);
+    // Para sitios tipo SPA (como el portal en Netlify), esperamos a que termine
+    // de traer datos de verdad, en vez de confiar en un tiempo fijo — si no,
+    // la grabación puede cortar mientras todavía dice "Cargando la plataforma...".
+    await page.waitForLoadState("networkidle", { timeout: 25000 }).catch(() => {});
+    await waitForAppLoaded(page);
+    await applyRedactions(page, scene.redactSelectors || []);
 
     if (scene.type === "form") {
       await fillAllFields(page, scene.fields || []);
