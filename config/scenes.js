@@ -135,7 +135,7 @@ const scenes = [
     id: "03-recorrido-portal",
     type: "navigate",
     url: ROLE_HOME_URLS.arbitro, // vista logueada; a continuación el guion entra al rol Árbitro
-    redactSelectors: [], // TODO: clase CSS de la tabla de expedientes reales, para taparla automáticamente
+    redactSelectors: [".exp-block"],
     actions: { waitMs: 15000, scroll: true },
     narration:
       "Una vez adentro, arriba a la izquierda ves tu nombre y tu rol. Al lado, un menú con tres apartados: 'Descargas', donde vas a encontrar los modelos y plantillas para tus escritos; 'Tutoriales', con esta misma guía; y 'Expedientes en Drive', con el archivo completo de todos los expedientes. " +
@@ -169,14 +169,16 @@ const scenes = [
         value: "Sin observaciones adicionales (dato de ejemplo).",
         optional: true,
       },
-      { kind: "text", label: "Informe arbitral (Word o PDF)", value: DRIVE_LINK_EJEMPLO, optional: true },
+      // El campo final de adjuntar archivo es ahora "Subir archivo" nativo en
+      // los 11 formularios de GeVi — no se automatiza (evita el login forzado
+      // de Google), solo se menciona en la narración que está disponible.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Informe Arbitral'. " +
       "Si sos árbitro, tu botón principal es 'Informe Arbitral' — es el que usás para dar inicio a un expediente disciplinario nuevo. " +
       "Te va a pedir: tu nombre y apellido, el Club Local y el Club Visitante, la Categoría, la fecha del partido, la descripción de los hechos, y si el acusado es capitán de su equipo — esto último solo si corresponde, si no, marcá 'No aplica'. " +
-      "Al final, un campo de Observaciones que es opcional, para links de YouTube, fotos, o cualquier aclaración extra. Y hay un campo para adjuntar el informe arbitral en Word o PDF, que también es opcional. " +
+      "Al final, un campo de Observaciones que es opcional, para links de YouTube, fotos, o cualquier aclaración extra. También está habilitada la opción de adjuntar un archivo. " +
       "Enviás el formulario, y automáticamente el sistema abre el expediente: le asigna un número interno, crea la carpeta en Drive, guarda un PDF con todo lo que cargaste, y te manda una constancia por mail — además de avisarle a todo el Tribunal y a los representantes de ambos clubes que se abrió un expediente nuevo.",
   },
   {
@@ -198,12 +200,12 @@ const scenes = [
         value: "Confirmo lo detallado en el informe original respecto a la secuencia de la jugada (texto de ejemplo).",
       },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Archivo adjunto", value: DRIVE_LINK_EJEMPLO, optional: true },
+      // Archivo adjunto -> "Subir archivo" nativo, no se automatiza (ver nota arriba).
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Responde y Aclara'. " +
-      "Completás tu respuesta, y si hace falta, adjuntás un archivo. Al enviarlo, tu respuesta se guarda directo en la carpeta del expediente, y se avisa al Tribunal y a ambos clubes.",
+      "Completás tu respuesta. También está habilitada la opción de adjuntar un archivo. Al enviarlo, tu respuesta se guarda directo en la carpeta del expediente, y se avisa al Tribunal y a ambos clubes.",
   },
 
   // ---------------------------------------------------------------------
@@ -213,7 +215,7 @@ const scenes = [
     id: "06-intro-club",
     type: "navigate",
     url: ROLE_HOME_URLS.representanteClub,
-    redactSelectors: [],
+    redactSelectors: [".exp-block"],
     actions: { waitMs: 15000 },
     narration:
       "Si sos representante de un club, vas a ver hasta cinco botones: Descargo, Recurso de Reconsideración, Reconsideración con Apelación en subsidio, Apelación, y Responde y Aclara.",
@@ -227,12 +229,12 @@ const scenes = [
       { kind: "dropdown", label: "Club", value: CLUBES[0] },
       { kind: "text", label: "N° de expediente", value: "EXP-2026-0001" },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Descargo (Word o PDF)", value: DRIVE_LINK_EJEMPLO },
+      // Descargo (Word o PDF) -> "Subir archivo" nativo, no se automatiza (ver nota arriba).
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Descargo'. " +
-      "El Descargo se usa para responder a un expediente que ya está abierto. Te pide tu nombre, tu club — que ya viene completado automáticamente si entraste desde tu botón personal del portal —, el número de expediente al que corresponde, tus observaciones, y el archivo del descargo en Word o PDF. " +
+      "El Descargo se usa para responder a un expediente que ya está abierto. Te pide tu nombre, tu club — que ya viene completado automáticamente si entraste desde tu botón personal del portal —, el número de expediente al que corresponde, y tus observaciones. También está habilitada la opción de adjuntar un archivo con el descargo. " +
       "Si hay más de una persona acusada en el mismo expediente, se puede presentar un descargo por cada una.",
   },
   {
@@ -244,12 +246,12 @@ const scenes = [
       { kind: "dropdown", label: "Club", value: CLUBES[0] },
       { kind: "text", label: "N° de expediente", value: "EXP-2026-0001" },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Recurso de Reconsideración (Word o PDF)", value: DRIVE_LINK_EJEMPLO },
+      // Recurso de Reconsideración (Word o PDF) -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Recurso de Reconsideración'. " +
-      "Este es para cuando ya hay un Fallo, y el club quiere pedir que el Tribunal lo reconsidere. Mismos campos que el Descargo: nombre, club, número de expediente, observaciones, y el escrito adjunto.",
+      "Este es para cuando ya hay un Fallo, y el club quiere pedir que el Tribunal lo reconsidere. Mismos campos que el Descargo: nombre, club, número de expediente, y observaciones. También está habilitada la opción de adjuntar el escrito.",
   },
   {
     id: "09-reconsideracion-apelacion-subsidio",
@@ -260,12 +262,12 @@ const scenes = [
       { kind: "dropdown", label: "Club", value: CLUBES[0] },
       { kind: "text", label: "N° de expediente", value: "EXP-2026-0001" },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Reconsideración con Apelación en subsidio (Word o PDF)", value: DRIVE_LINK_EJEMPLO },
+      // Reconsideración con Apelación en subsidio (Word o PDF) -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Reconsideración con Apelación en subsidio'. " +
-      "Esta opción combina las dos cosas en un solo escrito: pedís la reconsideración, y en subsidio — es decir, por si no prospera — también la apelación. Se completa igual que los anteriores. " +
+      "Esta opción combina las dos cosas en un solo escrito: pedís la reconsideración, y en subsidio — es decir, por si no prospera — también la apelación. Se completa igual que los anteriores, y también tiene habilitada la opción de adjuntar un archivo. " +
       "Recordá que toda apelación, sea directa o en subsidio, se presenta ante el Tribunal de la Federación Bonaerense de Básquetbol.",
   },
   {
@@ -277,12 +279,12 @@ const scenes = [
       { kind: "dropdown", label: "Club", value: CLUBES[0] },
       { kind: "text", label: "N° de expediente", value: "EXP-2026-0001" },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Apelación (Word o PDF)", value: DRIVE_LINK_EJEMPLO },
+      // Apelación (Word o PDF) -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Apelación'. " +
-      "Y esta es para apelar directamente un fallo ya emitido, sin pasar por la reconsideración. Mismos campos de siempre. " +
+      "Y esta es para apelar directamente un fallo ya emitido, sin pasar por la reconsideración. Mismos campos de siempre, con la opción de adjuntar un archivo. " +
       "Recordá que toda apelación, sea directa o en subsidio, se presenta ante el Tribunal de la Federación Bonaerense de Básquetbol.",
   },
   {
@@ -305,12 +307,12 @@ const scenes = [
         value: "Adjuntamos la aclaración solicitada por el Tribunal (texto de ejemplo).",
       },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Archivo adjunto", value: DRIVE_LINK_EJEMPLO, optional: true },
+      // Archivo adjunto -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario también se llama 'Responde y Aclara'. " +
-      "Se completa igual que el del árbitro: respuesta, y archivo si hace falta. Se guarda en la carpeta del expediente y se avisa a todos. " +
+      "Se completa igual que el del árbitro: respuesta, y también está habilitada la opción de adjuntar un archivo. Se guarda en la carpeta del expediente y se avisa a todos. " +
       "Un detalle importante: cada vez que se presenta algo sobre un expediente — de cualquiera de los dos lados — se les avisa por mail a los representantes de AMBOS clubes, no solo al que presentó. Así los dos quedan siempre al tanto de la actividad del caso.",
   },
 
@@ -318,13 +320,35 @@ const scenes = [
     id: "11c-denuncia",
     type: "form",
     url: "https://docs.google.com/forms/d/e/1FAIpQLSfNc5XwhXd0cGwc6Tc4NOFz2CHyiXSNnkYP1zXuJOXxQkBt8Q/viewform",
-    // Campos pendientes de confirmar (ver README / conversación) — por ahora la
-    // escena abre el formulario y espera, pero no completa nada todavía.
-    fields: [],
+    // OJO: Juan cambió temporalmente el campo de archivo a "Respuesta corta"
+    // para que podamos trabajar/probar con automatización. En algún momento
+    // lo va a volver a poner en "Subir archivo" (nativo) — cuando eso pase,
+    // hay que borrar la línea del campo "Denuncia (Word o PDF)" de más abajo,
+    // igual que se hizo en los otros 11 formularios.
+    fields: [
+      { kind: "text", label: "Correo electrónico", value: "club.ejemplo@gmail.com" },
+      { kind: "text", label: "Nombre y apellido de quien denuncia", value: "Roberto Sánchez" },
+      { kind: "dropdown", label: "Club", value: CLUBES[0], optional: true },
+      { kind: "date", label: "Fecha del hecho", value: "2026-09-10" },
+      {
+        kind: "longtext",
+        label: "Descripción de los hechos / motivo de la denuncia",
+        value:
+          "Texto de EJEMPLO para el video tutorial: se denuncia una conducta antirreglamentaria ocurrida durante el desarrollo del partido, no contemplada en el informe arbitral.",
+      },
+      {
+        kind: "longtext",
+        label: "Observaciones",
+        value: "Sin observaciones adicionales (dato de ejemplo).",
+        optional: true,
+      },
+      { kind: "text", label: "Denuncia (Word o PDF)", value: DRIVE_LINK_EJEMPLO, optional: true },
+    ],
     submit: false,
     narration:
       "Este formulario se llama 'Denuncia'. " +
-      "Tanto los representantes de club como los integrantes del Comité Ejecutivo tienen disponible este formulario para denunciar cualquier hecho que consideren contrario a la normativa vigente.",
+      "Tanto los representantes de club como los integrantes del Comité Ejecutivo tienen disponible este formulario para presentar una denuncia y dar inicio a un expediente disciplinario, por cualquier hecho que consideren contrario a la normativa vigente. " +
+      "Pide tu correo electrónico, tu nombre y apellido, el club — solo si sos representante de club —, la fecha del hecho, y la descripción de los hechos o motivo de la denuncia. Observaciones es opcional, y también está habilitada la opción de adjuntar un archivo con la denuncia.",
   },
 
   // ---------------------------------------------------------------------
@@ -334,7 +358,7 @@ const scenes = [
     id: "12-intro-tribunal",
     type: "navigate",
     url: ROLE_HOME_URLS.tribunal,
-    redactSelectors: [],
+    redactSelectors: [".exp-block"],
     actions: { waitMs: 15000 },
     narration:
       "El Tribunal tiene, además de todo lo que ya vimos, cuatro formularios propios: Expediente de Oficio, Solicitar Ampliación de Informe Arbitral, Requerir Aclaración a Clubes, y Cargar Fallo. Estos cuatro son de uso exclusivo del Tribunal — si alguien que no está aprobado como Tribunal intenta completarlos, el sistema no procesa nada y avisa por mail.",
@@ -353,7 +377,7 @@ const scenes = [
     // sistema real (no hay base de datos de prueba separada), buscar un club
     // real traería resultados reales (nombres, expedientes). Este término no
     // le pega a nada, así la búsqueda se ve funcionando sin exponer datos reales.
-    redactSelectors: [], // TODO: agregar acá la clase CSS de la tabla de resultados/expedientes cuando la tengamos, para taparla igual por las dudas
+    redactSelectors: [".exp-block"],
     fields: [
       { kind: "text", label: "Buscar", value: "Club de Ejemplo Ficticio ZZZ" },
       { kind: "dropdown", label: "Categoría", value: CATEGORIAS[0], optional: true },
@@ -376,12 +400,12 @@ const scenes = [
         value: "Expediente de oficio de ejemplo iniciado por el Tribunal a partir de un video difundido en redes sociales.",
       },
       { kind: "longtext", label: "Observaciones", value: "Sin observaciones (dato de ejemplo).", optional: true },
-      { kind: "text", label: "Archivo adjunto", value: DRIVE_LINK_EJEMPLO, optional: true },
+      // Archivo adjunto -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Expediente de Oficio'. " +
-      "Cuando el Tribunal necesita abrir un expediente sin que haya un informe arbitral o una denuncia previa, usa este formulario: Club Local, Club Visitante, Categoría, fecha del hecho, y el motivo o descripción de los hechos. El archivo es opcional acá, por si hay algo para adjuntar. " +
+      "Cuando el Tribunal necesita abrir un expediente sin que haya un informe arbitral o una denuncia previa, usa este formulario: Club Local, Club Visitante, Categoría, fecha del hecho, y el motivo o descripción de los hechos. También está habilitada la opción de adjuntar un archivo, por si hay algo para agregar. " +
       "Al enviarlo, se crea el expediente exactamente igual que con un Informe Arbitral: número interno, carpeta en Drive, PDF con los datos, y aviso a ambos clubes y a todo el Tribunal.",
   },
   {
@@ -400,7 +424,7 @@ const scenes = [
     submit: false,
     narration:
       "Este formulario se llama 'Solicitar Ampliación de Informe Arbitral'. " +
-      "Para pedirle al árbitro que amplíe o aclare su informe sobre un expediente ya abierto: ponés el número de expediente, y el motivo o la pregunta. El sistema busca solo al árbitro que cargó el informe original de ese expediente, y le manda el pedido con un link ya precompletado.",
+      "Para pedirle al árbitro que amplíe o aclare su informe sobre un expediente ya abierto: ponés el número de expediente, y el motivo o la pregunta. También está habilitada la opción de adjuntar un archivo. El sistema busca solo al árbitro que cargó el informe original de ese expediente, y le manda el pedido con un link ya precompletado.",
   },
   {
     id: "17-requerir-aclaracion-clubes",
@@ -418,7 +442,7 @@ const scenes = [
     submit: false,
     narration:
       "Este formulario se llama 'Requerir Aclaración a Clubes'. " +
-      "Igual que el anterior, pero para pedirle aclaración a los clubes: número de expediente y motivo. Le llega a los representantes aprobados de ambos clubes del caso.",
+      "Igual que el anterior, pero para pedirle aclaración a los clubes: número de expediente y motivo, con la opción de adjuntar un archivo. Le llega a los representantes aprobados de ambos clubes del caso.",
   },
   {
     id: "18-cargar-fallo",
@@ -428,12 +452,12 @@ const scenes = [
       { kind: "dropdown", label: "Club Local", value: CLUBES[0] },
       { kind: "dropdown", label: "Club Visitante", value: CLUBES[1] },
       { kind: "text", label: "N° de expediente", value: "EXP-2026-0001" },
-      { kind: "text", label: "Cargar Fallo (adjuntar PDF)", value: DRIVE_LINK_EJEMPLO },
+      // Cargar Fallo (adjuntar PDF) -> "Subir archivo" nativo, no se automatiza.
     ],
     submit: false,
     narration:
       "Este formulario se llama 'Cargar Fallo'. " +
-      "Y por último, el paso que cierra un expediente: cargar el Fallo. Acá pedimos Club Local, Club Visitante, el número de expediente — para evitar confundir casos si hay más de uno entre los mismos clubes al mismo tiempo —, y el archivo del Fallo en PDF. " +
+      "Y por último, el paso que cierra un expediente: cargar el Fallo. Acá pedimos Club Local, Club Visitante, el número de expediente — para evitar confundir casos si hay más de uno entre los mismos clubes al mismo tiempo —, y tenés que adjuntar el archivo del Fallo en PDF. " +
       "Al enviarlo, el sistema guarda el Fallo en la carpeta del expediente, lee automáticamente el contenido para completar la sanción, el tipo de sanción, y los artículos aplicados, y le manda el Fallo por mail a los representantes de ambos clubes y a todo el Tribunal. " +
       "Si el Fallo sanciona a más de una persona, el sistema crea una fila por cada una, todas dentro del mismo expediente.",
   },
@@ -445,7 +469,7 @@ const scenes = [
     id: "19-cierre",
     type: "navigate",
     url: ROLE_HOME_URLS.tribunal,
-    redactSelectors: [],
+    redactSelectors: [".exp-block"],
     actions: { waitMs: 15000 },
     narration:
       "Y con esto ya vimos el circuito completo: desde el registro, pasando por cada tipo de presentación, hasta la carga del Fallo. Cualquier duda que les quede, la sección 'Tutoriales' del portal tiene esta misma guía por escrito. Gracias por ver el video.",
