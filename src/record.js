@@ -67,21 +67,17 @@ async function waitForAppLoaded(page) {
     // no había cartel de carga visible, o ya desapareció -> seguimos sin problema
   }
 }
-// Difumina (blur) elementos de la pantalla antes de que termine la grabación —
-// pensado para tapar tablas con datos reales (expedientes, nombres) que puedan
-// aparecer en pantallas que se graban contra el sistema en producción.
-// scene.redactSelectors es un array de selectores CSS; por defecto vacío (no tapa nada).
+// Oculta completamente (no solo difumina) los elementos que puedan mostrar datos
+// reales (expedientes, nombres) — se inyecta como una regla CSS persistente, así
+// que sigue aplicando aunque la página vuelva a dibujar esos elementos más tarde
+// (a diferencia de aplicar un estilo puntual una sola vez, que se puede perder).
 async function applyRedactions(page, selectors = []) {
-  for (const selector of selectors) {
-    try {
-      await page.evaluate((sel) => {
-        document.querySelectorAll(sel).forEach((el) => {
-          el.style.filter = "blur(10px)";
-        });
-      }, selector);
-    } catch (_) {
-      // selector no encontrado en esta página, se ignora
-    }
+  if (!selectors || selectors.length === 0) return;
+  const css = selectors.map((sel) => `${sel} { visibility: hidden !important; }`).join("\n");
+  try {
+    await page.addStyleTag({ content: css });
+  } catch (_) {
+    // si falla la inyección (página ya navegó, etc.) seguimos sin bloquear la grabación
   }
 }
 async function recordScene(browser, scene) {
@@ -107,6 +103,7 @@ async function recordScene(browser, scene) {
 
   try {
     await page.goto(scene.url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await applyRedactions(page, scene.redactSelectors || []);
     await page.waitForTimeout(1200);
     await dismissConsentIfPresent(page);
     // Para sitios tipo SPA (como el portal en Netlify), esperamos a que termine
@@ -114,7 +111,7 @@ async function recordScene(browser, scene) {
     // la grabación puede cortar mientras todavía dice "Cargando la plataforma...".
     await page.waitForLoadState("networkidle", { timeout: 25000 }).catch(() => {});
     await waitForAppLoaded(page);
-    await applyRedactions(page, scene.redactSelectors || []);
+    await applyRedactions(page, scene.redactSelectors || []); // se reinyecta por si la navegación reseteó los estilos
 
     if (scene.type === "form") {
       await fillAllFields(page, scene.fields || []);

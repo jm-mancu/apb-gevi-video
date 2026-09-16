@@ -92,23 +92,12 @@ const scenes = [
   // ---------------------------------------------------------------------
   {
     id: "01-registro",
-    type: "form",
-    url: PORTAL_URL,
-    // El portal es una app de Apps Script (HtmlService), no un Google Form:
-    // los selectores de abajo son un punto de partida razonable (por texto visible)
-    // pero probablemente haya que ajustarlos una vez que Playwright abra el portal real,
-    // ya que HtmlService no tiene una estructura tan predecible como Google Forms.
-    fields: [
-      { kind: "clickText", label: "Registrarme" },
-      { kind: "text", label: "Nombre y apellido", value: "Juan Pérez" },
-      { kind: "text", label: "Email", value: "juan.perez@ejemplo.com" },
-      { kind: "text", label: "DNI", value: "30111222" },
-      { kind: "dropdown", label: "Rol", value: "Representante de Club" },
-      // Este campo solo existe si el Rol elegido es "Representante de Club"
-      { kind: "dropdown", label: "Club", value: "Argentino", optional: true },
-      { kind: "clickText", label: "Solicitar acceso", dryRun: true },
-    ],
-    submit: false,
+    type: "manual",
+    // El portal de registro es una pantalla a medida (Apps Script), no un Google
+    // Form — los selectores genéricos por texto no le pegan a su estructura real.
+    // Se graba a mano: completar Nombre y apellido, Email, DNI, Rol (probando
+    // "Representante de Club" para que se vea aparecer el campo Club), y tocar
+    // "Solicitar acceso" SIN enviarlo de verdad (cortar la grabación ahí).
     narration:
       "Lo primero que tiene que hacer cualquier persona nueva — sea árbitro, representante de club, o miembro del Tribunal — es registrarse una sola vez. Entrás al portal y tocás 'Registrarme'. " +
       "Te va a pedir: tu nombre y apellido, tu email, tu DNI, y tu rol. Elegís tu rol de la lista — Árbitro, Representante de Club, o Tribunal. " +
